@@ -1,0 +1,6 @@
+#!/bin/bash
+#This script is to install ANTLR (if you don't already have it) so you can run the "Micro" bash script.
+cd /usr/local/lib
+curl -O https://www.antlr.org/download/antlr-4.7.1-complete.jar
+export CLASSPATH=".:/usr/local/lib/antlr-4.7.1-complete.jar:$CLASSPATH"
+alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.7.1-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
