@@ -12,7 +12,7 @@ FLOATLITERAL : [0-9]*[.]+[0-9]+;
 
 STRINGLITERAL : '"'(.*?)'"';
 
-COMMENT : ('--')+(~'\n')* -> skip ;
+COMMENT : ('--')+.*?(~'\n')* -> skip ;
 
 OPERATOR : ':='|'+'|'-'|'*'|'/'|'='|'!='|'<'|'>'|'('|')'|';'|','|'<='|'>=';
 
@@ -21,7 +21,6 @@ WS : [ \t\r\n]+ -> skip ;
 /* Parser */
 
 /* Program */
-start: program EOF ;
 program : 'PROGRAM' id 'BEGIN' pgm_body 'END';
 id : IDENTIFIER;
 pgm_body: decl func_declarations;

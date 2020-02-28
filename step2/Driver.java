@@ -8,7 +8,7 @@ public class Driver {
 			LITTLELexer lexer = new LITTLELexer(CharStreams.fromFileName(args[0]));
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			LITTLEParser parser = new LITTLEParser(tokenStream);
-			//parser.removeErrorListeners();
+			parser.removeErrorListeners();
             BaseErrorListener listener = new BaseErrorListener();
 			parser.addErrorListener(new BaseErrorListener() {
 				@Override
