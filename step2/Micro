@@ -1,0 +1,8 @@
+#!/bin/bash
+#This script runs assuming you have antlr-4.7.1 downloaded within /usr/local/lib and added to your classpath.
+#Run antlr on the grammar file.
+java -Xmx500M -cp "/usr/local/lib/antlr-4.7.1-complete.jar:$CLASSPATH" org.antlr.v4.Tool LITTLE.g4
+#Compile the driver file
+javac Driver.java "LITTLEParser.java"
+#Run the driver file on the given input.
+java Driver $1
