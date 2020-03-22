@@ -19,7 +19,7 @@ public class Listener extends LITTLEBaseListener {
 	}
 	
 	@Override
-	public void exitFunc_decl(.Func_declContext ctx) {
+	public void exitFunc_decl(LITTLEParser.Func_declContext ctx) {
 		//operate on symbol table here...
 		System.out.println("EXITED");
 	}
