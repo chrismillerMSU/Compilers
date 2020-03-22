@@ -19,7 +19,11 @@ public class Driver {
 			});
 			//Step 3
 			MyListener listener = new MyListener();
-			new ParseTreeWalker().walk(listener, parser.program());
+			try {
+                new ParseTreeWalker().walk(listener, parser.program());
+            }catch (Error e){
+			    System.out.println(e.getMessage());
+            }
 
 
 		} catch (IOException e) {

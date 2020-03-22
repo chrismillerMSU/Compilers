@@ -1,39 +1,48 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 public class MyListener extends LITTLEBaseListener{
     private Stack symbolTableStack;
-    private Stack scopeStack;
+    private Queue<String> scopeOrder;
+    private Queue<String> tokenOrder;
     private String currentType;
     private String type;
     private HashMap values;
     private String lastName;
     private int blockNumber;
+    private boolean ifOrWhile;
 
     MyListener(){
         symbolTableStack = new Stack<HashMap>();
-        scopeStack = new Stack<String>();
+        scopeOrder = new LinkedList<>();
+        tokenOrder = new LinkedList<>();
         values = new HashMap<String, String>();
         blockNumber = 1;
         type = "";
         lastName = "";
+        ifOrWhile = false;
     }
 
-    private void printTable(HashMap symbolTabel){
-        symbolTabel.forEach((k,v) -> {
-            System.out.print("name "+k+" type "+v);
-            if(v == "STRING"){
-                System.out.println(" value " + values.get(k));
-            }else {
+    private void printTable(HashMap symbolTable){
+        System.out.println("Symbol table "+scopeOrder.remove());
+        while (tokenOrder.size()>0){
+            String name = tokenOrder.remove();
+            String type = (String) symbolTable.get(name);
+            System.out.print("name " + name + " type " + type);
+            if(type.equals("STRING")){
+                System.out.println(" value " + values.get(name));
+            }else{
                 System.out.println();
             }
-        });
+        }
+        System.out.println();
     }
 
 
     @Override public void enterProgram(LITTLEParser.ProgramContext ctx) {
-        scopeStack.push("GLOBAL");
-        System.out.println("Symbol table GLOBAL");
+        scopeOrder.add("GLOBAL");
         symbolTableStack.push(new HashMap<String, String>());
     }
 
@@ -42,31 +51,46 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
-        scopeStack.push("BLOCK " + blockNumber);
-        System.out.println();
-        System.out.println("Symbol table BLOCK " + blockNumber);
+        if(!ifOrWhile) {
+            printTable((HashMap) symbolTableStack.peek());
+        }
+        ifOrWhile = true;
+        scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
         blockNumber++;
     }
 
     @Override public void enterElse_part(LITTLEParser.Else_partContext ctx) {
-        scopeStack.pop();
-        symbolTableStack.pop();
-        scopeStack.push("BLOCK" + blockNumber);
-        System.out.println();
-        System.out.println("Symbol table BLOCK " + blockNumber);
+        if(!ctx.getText().equals("")) {
+            printTable((HashMap) symbolTableStack.pop());
+            scopeOrder.add("BLOCK " + blockNumber);
+            symbolTableStack.push(new HashMap<String, String>());
+            blockNumber++;
+        }
+    }
+    @Override public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
+        printTable((HashMap) symbolTableStack.pop());
+    }
+
+    @Override public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+        if(!ifOrWhile) {
+            printTable((HashMap) symbolTableStack.peek());
+        }
+        ifOrWhile = true;
+        scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
         blockNumber++;
     }
-    @Override public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
-        scopeStack.pop();
-        symbolTableStack.pop();
+
+    @Override public void exitWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+        printTable((HashMap) symbolTableStack.pop());
     }
 
     @Override public void enterFunc_declarations(LITTLEParser.Func_declarationsContext ctx) {
-//        if(scopeStack.contains("GLOBAL")){
-//            System.out.println("Symbol table " + scopeStack.pop());
-//        }
+        if(scopeOrder.contains("GLOBAL")){
+            printTable((HashMap) symbolTableStack.peek());
+        }
+
     }
 
     @Override public void enterFunc_decl(LITTLEParser.Func_declContext ctx) {
@@ -75,8 +99,11 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void exitFunc_decl(LITTLEParser.Func_declContext ctx) {
-        scopeStack.pop();
-        symbolTableStack.pop();
+        if(ifOrWhile) {
+            ifOrWhile = false;
+        }else{
+            printTable((HashMap) symbolTableStack.pop());
+        }
     }
 
     @Override public void enterVar_type(LITTLEParser.Var_typeContext ctx) {
@@ -88,8 +115,7 @@ public class MyListener extends LITTLEBaseListener{
         type = "str";
     }
     @Override public void enterStr(LITTLEParser.StrContext ctx) {
-        System.out.print(" value "+ ctx.getText());
-        System.out.println();
+        values.put(lastName, ctx.getText());
     }
 
     @Override public void exitString_decl(LITTLEParser.String_declContext ctx) {
@@ -117,17 +143,13 @@ public class MyListener extends LITTLEBaseListener{
         if(type.equals("varDec") || type.equals("str")) {
             HashMap symbolTable = (HashMap) symbolTableStack.peek();
             if(symbolTable.containsKey(name)){
-                //FUCK
+                throw new Error("DECLARATION ERROR " + name);
             }
             symbolTable.put(name, currentType);
-            System.out.print("name "+name+" type "+currentType);
+            tokenOrder.add(name);
+            lastName = name;
         }else if(type.equals("funct")){
-            scopeStack.push(name);
-            System.out.println();
-            System.out.println("Symbol table " + name);
-        }
-        if(type.equals("varDec")){
-            System.out.println();
+            scopeOrder.add(name);
         }
     }
 }
