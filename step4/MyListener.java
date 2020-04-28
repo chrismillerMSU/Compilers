@@ -25,6 +25,10 @@ public class MyListener extends LITTLEBaseListener{
         ifOrWhile = false;
     }
 
+    public HashMap<String, String> getSymbolTable(){
+        return (HashMap<String, String>) symbolTableStack.peek();
+    }
+
     private void printTable(HashMap symbolTable){
         System.out.println("Symbol table "+scopeOrder.remove());
         System.out.println(symbolTable);

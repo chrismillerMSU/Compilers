@@ -8,9 +8,8 @@ class ASTNode {
 	
 	/** create an AST node for an expression. i.e. MulExpr. These have no variables, but do have types.
 	*	@param exprType, the type of expression, i.e. Mul, Add, Sub, Div...
-	*	@param isExpr, true if this is an expression.
 	*/
-	public ASTNode(String exprType, Boolean isExpr) {
+	public ASTNode(String exprType) {
 		this.type = exprType;
 		this.isExpr = true;
 		this.varName = null;
