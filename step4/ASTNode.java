@@ -1,8 +1,10 @@
+import java.util.ArrayList;
+
 class ASTNode {
-	String varName;
-	String type;
-	boolean isExpr;
-	ArrayList<ASTNode> children = new ArrayList<ASTNode>();
+	private String varName;
+	private String type;
+	private boolean isExpr;
+	private ArrayList<ASTNode> children = new ArrayList<ASTNode>();
 	
 	/** create an AST node for an expression. i.e. MulExpr. These have no variables, but do have types.
 	*	@param exprType, the type of expression, i.e. Mul, Add, Sub, Div...
@@ -19,7 +21,7 @@ class ASTNode {
 	*	@param varType, the type of variable, i.e. int, float, string...
 	*/
 	public ASTNode(String varName, String varType) {
-		this.type = opType;
+		this.type = varType;
 		this.varName = varName;
 		this.isExpr = false;
 	}

@@ -27,6 +27,7 @@ public class MyListener extends LITTLEBaseListener{
 
     private void printTable(HashMap symbolTable){
         System.out.println("Symbol table "+scopeOrder.remove());
+        System.out.println(symbolTable);
         while (tokenOrder.size()>0){
             String name = tokenOrder.remove();
             String type = (String) symbolTable.get(name);
@@ -47,13 +48,13 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
-        System.out.println();
+//        System.out.println();
     }
 
     @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
-        if(!ifOrWhile) {
-            printTable((HashMap) symbolTableStack.peek());
-        }
+//        if(!ifOrWhile) {
+//            printTable((HashMap) symbolTableStack.peek());
+//        }
         ifOrWhile = true;
         scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
@@ -62,20 +63,20 @@ public class MyListener extends LITTLEBaseListener{
 
     @Override public void enterElse_part(LITTLEParser.Else_partContext ctx) {
         if(!ctx.getText().equals("")) {
-            printTable((HashMap) symbolTableStack.pop());
+            symbolTableStack.pop(); //Was printTable
             scopeOrder.add("BLOCK " + blockNumber);
             symbolTableStack.push(new HashMap<String, String>());
             blockNumber++;
         }
     }
     @Override public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
-        printTable((HashMap) symbolTableStack.pop());
+        symbolTableStack.pop(); //Was printTable
     }
 
     @Override public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
-        if(!ifOrWhile) {
-            printTable((HashMap) symbolTableStack.peek());
-        }
+//        if(!ifOrWhile) {
+//            printTable((HashMap) symbolTableStack.peek());
+//        }
         ifOrWhile = true;
         scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
@@ -83,13 +84,13 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void exitWhile_stmt(LITTLEParser.While_stmtContext ctx) {
-        printTable((HashMap) symbolTableStack.pop());
+        symbolTableStack.pop(); //Was printTable
     }
 
     @Override public void enterFunc_declarations(LITTLEParser.Func_declarationsContext ctx) {
-        if(scopeOrder.contains("GLOBAL")){
-            printTable((HashMap) symbolTableStack.peek());
-        }
+//        if(scopeOrder.contains("GLOBAL")){
+//            printTable((HashMap) symbolTableStack.peek());
+//        }
 
     }
 
@@ -102,7 +103,7 @@ public class MyListener extends LITTLEBaseListener{
         if(ifOrWhile) {
             ifOrWhile = false;
         }else{
-            printTable((HashMap) symbolTableStack.pop());
+            symbolTableStack.pop(); //Was printTable
         }
     }
 
