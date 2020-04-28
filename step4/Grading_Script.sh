@@ -1,5 +1,4 @@
 #!/bin/sh
-
 INPUTS=inputs/*
 mkdir usertest
 for i in $INPUTS

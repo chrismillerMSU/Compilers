@@ -4,6 +4,7 @@ class ASTNode {
 	private String varName;
 	private String type;
 	private boolean isExpr;
+	private String value;
 	private ArrayList<ASTNode> children = new ArrayList<ASTNode>();
 	
 	/** create an AST node for an expression. i.e. MulExpr. These have no variables, but do have types.
@@ -13,16 +14,18 @@ class ASTNode {
 		this.type = exprType;
 		this.isExpr = true;
 		this.varName = null;
+		this.value = null;
 	}
 	
 	/** create an AST node for an a variable. i.e. int a, int b, string c.
 	*	@param varName, the name of the variable
 	*	@param varType, the type of variable, i.e. int, float, string...
 	*/
-	public ASTNode(String varName, String varType) {
+	public ASTNode(String varName, String varType, String value) {
 		this.type = varType;
 		this.varName = varName;
 		this.isExpr = false;
+		this.value = value;
 	}
 	
 	/** add children to ASTNode. This could either be a variable, or an expression.
