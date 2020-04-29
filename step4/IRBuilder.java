@@ -5,6 +5,7 @@ public class IRBuilder {
     HashMap<String, String> registers = new HashMap<String, String>();
 
     public IRBuilder() {
+        System.out.println(";IR code");
     }
 
     public void addNode(ASTNode node) {
@@ -12,11 +13,11 @@ public class IRBuilder {
         if(op.equals("STORE")) {
             while(node.children.size() > 0) {
                 ASTNode child = node.children.removeFirst();
-                String type = determineType(child.type);
+                String type = setType(child.type);
                 //NEED TO ACCOUNT FOR ALREADY USED REGISTERS.
                 registers.put("$T" + registerCounter, child.varName);
-                System.out.println("STORE"+type+ " " + child.value + " $T" + registerCounter);
-                System.out.println("STORE"+type+ " " + "$T" + registerCounter + " " + child.varName);
+                System.out.println(";STORE"+type+ " " + child.value + " $T" + registerCounter);
+                System.out.println(";STORE"+type+ " " + "$T" + registerCounter + " " + child.varName);
                 registerCounter++;
             }
         } else if(op.equals("ADD")) {
@@ -36,8 +37,14 @@ public class IRBuilder {
         } else if(op.equals("WRITE") || op.equals("READ")) {
             while (node.children.size() > 0) {
                 ASTNode child = node.children.removeFirst();
-                String type = determineType(child.type);
-                System.out.println(op + type +  " " + child.varName);
+                String type = setType(child.type);
+                System.out.println(";" + op + type +  " " + child.varName);
+            }
+        } else if(op.equals("LABEL")) {
+            while (node.children.size() > 0) {
+                ASTNode child = node.children.removeFirst();
+                System.out.println(";LABEL " + child.varName);
+                System.out.println(";LINK");
             }
         }
     }
@@ -58,10 +65,6 @@ public class IRBuilder {
                 break;
         }
         return type;
-    }
-
-    public void addExpression(String exprType, String varName, String varType, String value) {
-
     }
 
     public String setOp(String varType) {
