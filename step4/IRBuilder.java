@@ -42,7 +42,7 @@ public class IRBuilder {
         }
     }
 
-    public String determineType(String value) {
+    public String setType(String value) {
         String type = "";
         switch(value) {
             case "INT":

@@ -68,7 +68,6 @@ public class ASTBuilder extends LITTLEBaseListener{
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
             ir.addNode(node);
-            //
         }
     }
 
