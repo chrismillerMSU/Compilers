@@ -25,7 +25,6 @@ public class ASTBuilder extends LITTLEBaseListener{
 
 
         //-------------------------
-
         symbolTableStack.add(expr);
     }
 
@@ -65,13 +64,11 @@ public class ASTBuilder extends LITTLEBaseListener{
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
         //on exit program print the AST...
         System.out.println("PRINT THE AST");
+        IRBuilder ir = new IRBuilder();
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
-            System.out.println(node.type);
-            while(node.children.size() > 0) {
-                ASTNode child = node.children.removeFirst();
-                System.out.println(child.varName);
-            }
+            ir.addNode(node);
+            //
         }
     }
 
