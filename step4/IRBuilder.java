@@ -15,6 +15,9 @@ public class IRBuilder {
                 ASTNode child = node.children.removeFirst();
                 String type = setType(child.type);
                 //NEED TO ACCOUNT FOR ALREADY USED REGISTERS.
+                //IF IT HAS VARIABLES, THEN JUST DO SECOND STORE WITH REGISTER FROM MULT, ADD, SUB, DIVI OPERATION.
+
+                //---------------------------------
                 registers.put("$T" + registerCounter, child.varName);
                 System.out.println(";STORE"+type+ " " + child.value + " $T" + registerCounter);
                 System.out.println(";STORE"+type+ " " + "$T" + registerCounter + " " + child.varName);
