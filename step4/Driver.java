@@ -27,9 +27,10 @@ public class Driver {
             }
             System.out.println(listener.getSymbolTable());
 
-            ASTBuilder astBuilder = new ASTBuilder(listener.getSymbolTable());
+            ASTBuilder astBuilder = new ASTBuilder(parser);
 			try {
-				new ParseTreeWalker().walk(astBuilder, context);
+			    System.out.println("Interative");
+				new IterativeParseTreeWalker().walk(astBuilder, context);
 			}catch (Error e){
 				System.out.println(e.getMessage());
 			}
