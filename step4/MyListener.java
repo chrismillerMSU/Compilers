@@ -53,6 +53,7 @@ public class MyListener extends LITTLEBaseListener{
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
 //        System.out.println();
+
     }
 
     @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {

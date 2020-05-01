@@ -6,6 +6,9 @@ class ASTNode {
 	public String type;
 	public boolean isExpr;
 	public String value;
+	private ASTNode leftChild = null;
+	private ASTNode rightChild = null;
+	private ASTNode parent = null;
 	public LinkedList<ASTNode> children = new LinkedList<ASTNode>();
 	
 	/** create an AST node for an expression. i.e. MulExpr. These have no variables, but do have types.
@@ -35,5 +38,34 @@ class ASTNode {
 	public void add_expr(ASTNode node) {
 		this.children.add(node);
 	}
+	public void addRightChild(ASTNode node) {
+		this.rightChild = node;
+	}
+	public void addLeftChild(ASTNode node) {
+		this.leftChild = node;
+	}
 
+	public void addParent(ASTNode node){
+		this.parent = node;
+	}
+
+	public ASTNode getLeftChild(){return leftChild;}
+
+	public ASTNode getrightChild(){return rightChild;}
+
+	public ASTNode getParent(){return parent;}
+
+	public boolean leftChildExists(){return leftChild != null;}
+	public boolean rightChildExists(){return rightChild != null;}
+
+	public boolean getChildSide(ASTNode node){
+		if(leftChild != null && this.leftChild.equals(node)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+
+	public String getName(){return this.type;}
 }
