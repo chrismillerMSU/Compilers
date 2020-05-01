@@ -431,8 +431,10 @@ public class ASTBuilder extends LITTLEBaseListener{
                     varStack.push(name);
                     System.out.print(name);
                     System.out.println(counter.getParent());
-                    if(!counter.getParent().getChildSide(counter)){ //if right child
+                    if(counter.getParent() != null &&!counter.getParent().getChildSide(counter)){ //if right child
                         varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
+                    }else if(counter.getParent() == null){ //root
+                        printOperation(opStack.pop(),varStack.pop(),varStack.pop());
                     }
                 }
             }
