@@ -414,7 +414,7 @@ public class ASTBuilder extends LITTLEBaseListener{
         float total = 0;
         int count = 0;
         int count2 = 0;
-        ArrayList<ASTNode> visited = new ArrayList<>();
+        HashMap<ASTNode, Integer> visited = new HashMap<>();
         Stack<String> opStack = new Stack<>();
         Stack<String> varStack = new Stack<>();
 //        System.out.println("PRINTING CODE:");
@@ -427,14 +427,13 @@ public class ASTBuilder extends LITTLEBaseListener{
             ASTNode leftChild = counter.getLeftChild();
             ASTNode rightChild = counter.getrightChild();
 
-            if(!visited.contains(counter)){
-                visited.add(counter);
+            if(!visited.containsKey(counter)){
+                visited.put(counter,1);
                 if(type.equals("op")){
                     opStack.push(name);
                 }else if(type.equals("var")||type.equals("int")||type.equals("float")){
+                    if(varStack.size()>1)System.out.println(varStack.peek());
                     varStack.push(name);
-//                    System.out.print(name);
-//                    System.out.println(counter.getParent());
                     if(counter.getParent() != null &&!counter.getParent().getChildSide(counter)){ //if right child
                         varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
                     }else if(counter.getParent() == null){ //root
@@ -442,14 +441,18 @@ public class ASTBuilder extends LITTLEBaseListener{
                         //ADD TO IR BUILDER addNode();
                     }
                 }
+            }else if(visited.get(counter)>1 && type.equals("op") && getType(leftChild.getName()).equals("op") && getType(rightChild.getName()).equals("op")){
+                varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
+            }else{
+                visited.replace(counter,1,2); //If we visit twice
             }
 
 
-            if((leftChild ==null && rightChild == null) || (visited.contains(leftChild) && visited.contains(rightChild))){
+            if((leftChild ==null && rightChild == null) || (visited.containsKey(leftChild) && visited.containsKey(rightChild))){
                 counter = counter.getParent();
-            }else if(leftChild != null && !visited.contains(leftChild)){
+            }else if(leftChild != null && !visited.containsKey(leftChild)){
                 counter = counter.getLeftChild();
-            }else if(rightChild != null && !visited.contains(rightChild)){
+            }else if(rightChild != null && !visited.containsKey(rightChild)){
                 counter = counter.getrightChild();
             }
         }while(counter != null && count2<100);
