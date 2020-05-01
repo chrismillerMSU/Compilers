@@ -1,6 +1,5 @@
-import java.util.HashMap;
-import java.util.Queue;
-import java.util.LinkedList;
+import java.util.*;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.lang.reflect.Array;
@@ -12,7 +11,6 @@ public class ASTBuilder extends LITTLEBaseListener{
     private boolean splitEnded = false;
     private ASTNode root;
     private ASTNode curChild = null;
-    private LITTLEParser parser;
     private ASTNode rootNode;
     private Queue<ASTNode> symbolTableStack = new LinkedList<ASTNode>();
     private HashMap<String,String> symbolTable;
@@ -40,6 +38,8 @@ public class ASTBuilder extends LITTLEBaseListener{
     }
     @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
         printAST();
+        printCode();
+
     }
 
     @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) {
@@ -166,7 +166,8 @@ public class ASTBuilder extends LITTLEBaseListener{
         }catch (NumberFormatException e){
 
         }
-        if(input.length() == 1)return "var";
+        if(input.equals("+") || input.equals("-")||input.equals("*")||input.equals("/")||input.equals("="))return "op";
+        else if(input.length() == 1)return "var";
         return "none";
     }
 
@@ -216,7 +217,7 @@ public class ASTBuilder extends LITTLEBaseListener{
                 curChild.addParent(newNode);
                 newNode.addLeftChild(curChild);
                 curChild = newNode;
-                printInfo();
+                //printInfo();
                 return;
 
             } else if(splitEnded){
@@ -400,6 +401,54 @@ public class ASTBuilder extends LITTLEBaseListener{
                 counter = counter.getrightChild();
             }
         }while(counter != null && count2<100);
+    }
+
+    private void printCode(){
+        ASTNode counter = root;
+        if(counter.getLeftChild() == null)return; //If var declaration
+        float total = 0;
+        int count = 0;
+        int count2 = 0;
+        ArrayList<ASTNode> visited = new ArrayList<>();
+        Stack<String> opStack = new Stack<>();
+        Stack<String> varStack = new Stack<>();
+        System.out.println("PRINTING CODE:");
+        do{
+            count2++;
+            String name = counter.getName();
+            String type = getType(name);
+            String rightChildName;
+            String leftChildName;
+            ASTNode leftChild = counter.getLeftChild();
+            ASTNode rightChild = counter.getrightChild();
+
+            if(!visited.contains(counter)){
+                visited.add(counter);
+                if(type.equals("op")){
+                    opStack.push(name);
+                }else if(type.equals("var")){
+                    varStack.push(name);
+                    System.out.println(name);
+                    if(!counter.getParent().getChildSide(counter)){ //if right child
+                        printOperation(opStack.pop(),varStack.pop(),varStack.pop());
+                    }
+                }
+            }
+
+
+            if((leftChild ==null && rightChild == null) || (visited.contains(leftChild) && visited.contains(rightChild))){
+                counter = counter.getParent();
+            }else if(leftChild != null && !visited.contains(leftChild)){
+                counter = counter.getLeftChild();
+            }else if(rightChild != null && !visited.contains(rightChild)){
+                counter = counter.getrightChild();
+            }
+        }while(counter != null && count2<100);
+    }
+
+    private String printOperation(String op, String right, String left){
+        System.out.println("OPERATION: " + op + "RIGHT: " + right + "LEFT: " + left);
+        return 
     }
 
 }
