@@ -31,14 +31,19 @@ public class ASTBuilder extends LITTLEBaseListener{
 
         //-------------------------
         //ADD SOME CODE FOR CHECKING FOR ARITHMETIC OPERATIONS...
-
+//
 
 
         //-------------------------
         symbolTableStack.add(expr);
     }
     @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
-        printAST();
+        IRBuilder ir = new IRBuilder();
+        while(symbolTableStack.size() > 0) {
+            ASTNode node = symbolTableStack.poll();
+            ir.addNode(node);
+        }
+//        printAST();
         printCode();
 
     }
@@ -76,7 +81,6 @@ public class ASTBuilder extends LITTLEBaseListener{
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
         //on exit program print the AST...
-        System.out.println("PRINT THE AST");
         IRBuilder ir = new IRBuilder();
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
@@ -413,7 +417,7 @@ public class ASTBuilder extends LITTLEBaseListener{
         ArrayList<ASTNode> visited = new ArrayList<>();
         Stack<String> opStack = new Stack<>();
         Stack<String> varStack = new Stack<>();
-        System.out.println("PRINTING CODE:");
+//        System.out.println("PRINTING CODE:");
         do{
             count2++;
             String name = counter.getName();
@@ -429,12 +433,13 @@ public class ASTBuilder extends LITTLEBaseListener{
                     opStack.push(name);
                 }else if(type.equals("var")||type.equals("int")||type.equals("float")){
                     varStack.push(name);
-                    System.out.print(name);
-                    System.out.println(counter.getParent());
+//                    System.out.print(name);
+//                    System.out.println(counter.getParent());
                     if(counter.getParent() != null &&!counter.getParent().getChildSide(counter)){ //if right child
                         varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
                     }else if(counter.getParent() == null){ //root
                         printOperation(opStack.pop(),varStack.pop(),varStack.pop());
+                        //ADD TO IR BUILDER addNode();
                     }
                 }
             }

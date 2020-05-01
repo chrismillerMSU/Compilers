@@ -5,7 +5,25 @@ public class IRBuilder {
     HashMap<String, String> registers = new HashMap<String, String>();
 
     public IRBuilder() {
-        System.out.println(";IR code");
+//        System.out.println(";IR code");
+    }
+
+    public void addComplexNode(String op, String right, String left) {
+        String opType = setOp(op);
+        if(opType.equals("ADD")) {
+            String newRight = registers.containsKey(right) ? registers.get(right) : right;
+            String newLeft = registers.containsKey(left) ? registers.get(left) : left;
+
+//            registers.put("$T" + registerCounter, child.varName);
+//                System.out.println("ADDI " + child.value + " $T" + registerCounter);
+//                registerCounter++;
+        } else if(opType.equals("MULTI")) {
+
+        } else if(opType.equals("SUB")) {
+
+        } else if(opType.equals("DIVI")) {
+
+        }
     }
 
     public void addNode(ASTNode node) {
@@ -16,27 +34,14 @@ public class IRBuilder {
                 String type = setType(child.type);
                 //NEED TO ACCOUNT FOR ALREADY USED REGISTERS.
                 //IF IT HAS VARIABLES, THEN JUST DO SECOND STORE WITH REGISTER FROM MULT, ADD, SUB, DIVI OPERATION.
-
-                //---------------------------------
-                registers.put("$T" + registerCounter, child.varName);
-                System.out.println(";STORE"+type+ " " + child.value + " $T" + registerCounter);
-                System.out.println(";STORE"+type+ " " + "$T" + registerCounter + " " + child.varName);
-                registerCounter++;
+                if(!child.value.contains("+") && !child.value.contains("-") && !child.value.contains("*") && !child.value.contains("/")) {
+                    //---------------------------------
+                    registers.put("$T" + registerCounter, child.varName);
+                    System.out.println(";STORE" + type + " " + child.value + " $T" + registerCounter);
+                    System.out.println(";STORE" + type + " " + "$T" + registerCounter + " " + child.varName);
+                    registerCounter++;
+                }
             }
-        } else if(op.equals("ADD")) {
-            while(node.children.size() > 0) {
-                ASTNode child = node.children.removeFirst();
-                System.out.println(child.varName);
-//                registers.put("$T" + registerCounter, child.varName);
-//                System.out.println("ADDI " + child.value + " $T" + registerCounter);
-//                registerCounter++;
-            }
-        } else if(op.equals("MULTI")) {
-
-        } else if(op.equals("SUB")) {
-
-        } else if(op.equals("DIVI")) {
-
         } else if(op.equals("WRITE") || op.equals("READ")) {
             while (node.children.size() > 0) {
                 ASTNode child = node.children.removeFirst();
@@ -46,6 +51,7 @@ public class IRBuilder {
         } else if(op.equals("LABEL")) {
             while (node.children.size() > 0) {
                 ASTNode child = node.children.removeFirst();
+                System.out.println(";IR code");
                 System.out.println(";LABEL " + child.varName);
                 System.out.println(";LINK");
             }
