@@ -1,21 +1,23 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 class ASTNode {
-	private String varName;
-	private String type;
-	private boolean isExpr;
-	private String value;
+	public String varName;
+	public String type;
+	public boolean isExpr;
+	public String value;
 	private ASTNode leftChild = null;
 	private ASTNode rightChild = null;
 	private ASTNode parent = null;
+	public LinkedList<ASTNode> children = new LinkedList<ASTNode>();
 	
 	/** create an AST node for an expression. i.e. MulExpr. These have no variables, but do have types.
-	*	@param name, the type of expression, i.e. Mul, Add, Sub, Div...
+	*	@param exprType, the type of expression, i.e. Mul, Add, Sub, Div...
 	*/
-	public ASTNode(String name) {
-		this.type = name;
+	public ASTNode(String exprType) {
+		this.type = exprType;
 		this.isExpr = true;
-		this.varName = null;
+		this.varName = "";
 		this.value = null;
 	}
 	
@@ -33,6 +35,9 @@ class ASTNode {
 	/** add children to ASTNode. This could either be a variable, or an expression.
 	*	@param node, the ASTNode to add.
 	*/
+	public void add_expr(ASTNode node) {
+		this.children.add(node);
+	}
 	public void addRightChild(ASTNode node) {
 		this.rightChild = node;
 	}
