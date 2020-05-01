@@ -9,6 +9,7 @@ import java.util.List;
 public class ASTBuilder extends LITTLEBaseListener{
     private boolean splitting = false;
     private boolean splitEnded = false;
+    private int tempNumber = 0;
     private ASTNode root;
     private ASTNode curChild = null;
     private ASTNode rootNode;
@@ -426,11 +427,12 @@ public class ASTBuilder extends LITTLEBaseListener{
                 visited.add(counter);
                 if(type.equals("op")){
                     opStack.push(name);
-                }else if(type.equals("var")){
+                }else if(type.equals("var")||type.equals("int")||type.equals("float")){
                     varStack.push(name);
-                    System.out.println(name);
+                    System.out.print(name);
+                    System.out.println(counter.getParent());
                     if(!counter.getParent().getChildSide(counter)){ //if right child
-                        printOperation(opStack.pop(),varStack.pop(),varStack.pop());
+                        varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
                     }
                 }
             }
@@ -447,8 +449,9 @@ public class ASTBuilder extends LITTLEBaseListener{
     }
 
     private String printOperation(String op, String right, String left){
-        System.out.println("OPERATION: " + op + "RIGHT: " + right + "LEFT: " + left);
-        return 
+        tempNumber++;
+        System.out.println("OPERATION: " + op + " RIGHT: " + right+  " LEFT: " +left + " = "+ "T"+tempNumber);
+        return "T" + tempNumber;
     }
 
 }
