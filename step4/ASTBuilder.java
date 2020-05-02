@@ -16,12 +16,14 @@ public class ASTBuilder extends LITTLEBaseListener{
     private ASTNode rootNode;
     private Queue<ASTNode> symbolTableStack = new LinkedList<ASTNode>();
     private HashMap<String,String> symbolTable;
+    private HashMap<String,String> stringValues;
     HashSet<Integer> registers = new HashSet<Integer>();
     AssemblyBuilder ir;
 
-    ASTBuilder(HashMap<String,String> symbolTable){
+    ASTBuilder(HashMap<String,String> symbolTable, HashMap<String,String> stringValues){
         this.symbolTable = symbolTable;
-        this.ir = new AssemblyBuilder(symbolTable);
+        this.stringValues = stringValues;
+        this.ir = new AssemblyBuilder(symbolTable, stringValues);
     }
     @Override public void enterAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
         char var = ctx.getText().charAt(0);
@@ -32,12 +34,6 @@ public class ASTBuilder extends LITTLEBaseListener{
         root = new ASTNode("=");
         root.addRightChild(new ASTNode(Character.toString(var)));
         curChild = root;
-
-        //-------------------------
-        //ADD SOME CODE FOR CHECKING FOR ARITHMETIC OPERATIONS...
-
-
-        //-------------------------
         symbolTableStack.add(expr);
     }
     @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
@@ -81,14 +77,12 @@ public class ASTBuilder extends LITTLEBaseListener{
     }
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
-        //on exit program print the AST...
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
             ir.addNode(node);
         }
-        //
-//        System.out.println(";RET");
-//        System.out.println(";tiny code");
+        //System.out.println(";RET");
+        //System.out.println(";tiny code");
         System.out.println("sys halt");
     }
 
@@ -119,13 +113,8 @@ public class ASTBuilder extends LITTLEBaseListener{
             }
         }
         if(op.length()==1) {
-//            System.out.println("E op: "+op +"__"+ op.length());
-//            System.out.println("E left: "+left+"__"+ left.length());
-//            System.out.println("E right: "+right+"__"+ right.length());
             addNode(right,left,op);
         }
-
-//        System.out.println();
     }
 
     @Override public void exitFactor_prefix(LITTLEParser.Factor_prefixContext ctx) {
@@ -141,7 +130,6 @@ public class ASTBuilder extends LITTLEBaseListener{
             left = ctx.postfix_expr().getText();
         }catch (Exception e){
             rightSide = false;
-            //System.out.println(e.getMessage());
         }
         if(!rightSide) {
             try {
@@ -151,13 +139,9 @@ public class ASTBuilder extends LITTLEBaseListener{
                 op = ctx.mulop().getText();
                 left = ctx.postfix_expr().getText();
             } catch (Exception e) {
-                //System.out.println(e.getMessage());
             }
         }
         if(op.length() == 1) {
-            //System.out.println("F op: "+op);
-            //System.out.println("F left: "+left);
-            //System.out.println("F right: "+right);
             addNode(right,left,op);
         }
     }
@@ -198,7 +182,6 @@ public class ASTBuilder extends LITTLEBaseListener{
         }
         if (!(rightType.equals("none")) && !(leftType.equals("none"))) {
             if(curChild.getLeftChild()==null){
-//                System.out.println("curr left child: none");
                 newNode.addParent(curChild);
                 curChild.addLeftChild(newNode);
                 curChild = newNode;
@@ -207,26 +190,19 @@ public class ASTBuilder extends LITTLEBaseListener{
                 splitting = true;
                 if(parent.getChildSide(curChild)){
                     parent.addLeftChild(newNode);
-
                     ASTNode rightNode = new ASTNode(right);
                     rightNode.addParent(newNode);
                     newNode.addRightChild(rightNode);
-
-
                 }else{
                     parent.addRightChild(newNode);
-
                     ASTNode rightNode = new ASTNode(right);
                     rightNode.addParent(newNode);
                     newNode.addRightChild(rightNode);
                 }
-
                 newNode.addParent(parent);
-
                 curChild.addParent(newNode);
                 newNode.addLeftChild(curChild);
                 curChild = newNode;
-                //printInfo();
                 return;
 
             } else if(splitEnded){
@@ -241,27 +217,21 @@ public class ASTBuilder extends LITTLEBaseListener{
                     }
                     curChild.addParent(dupe);
                     dupe.addLeftChild(curChild);
-
-
                     ASTNode leftNode = new ASTNode(left);
                     leftNode.addParent(newNode);
                     newNode.addLeftChild(leftNode);
-
                     ASTNode rightNode = new ASTNode(right);
                     rightNode.addParent(newNode);
                     newNode.addRightChild(rightNode);
                     dupe.addRightChild(newNode);
                     newNode.addParent(dupe);
                     curChild = dupe;
-                    //System.out.println("Right Child p= " + rightNode.getParent().getName());
                     return;
                 }
             } else{
                 newNode.addParent(curChild);
                 curChild.addRightChild(newNode);
                 curChild = newNode;
-                //System.out.println("curr Node: "+ curChild.getName());
-                //System.out.println("parent left child: "+ curChild.getParent().getLeftChild().getName());
             }
             ASTNode leftNode = new ASTNode(left);
             leftNode.addParent(curChild);
@@ -281,10 +251,8 @@ public class ASTBuilder extends LITTLEBaseListener{
             try {
                 ASTNode rightNode = new ASTNode(right);
                 ASTNode parent = curChild.getParent();
-
                 newNode.addRightChild(rightNode);
                 rightNode.addParent(newNode);
-
                 newNode.addLeftChild(curChild);
                 curChild.addParent(newNode);
                 boolean side = parent.getChildSide(curChild);
@@ -322,7 +290,6 @@ public class ASTBuilder extends LITTLEBaseListener{
 
             }
         }
-        //printInfo();
     }
 
     private boolean sameKindOfOp(String currOp, String newOp){
@@ -406,7 +373,6 @@ public class ASTBuilder extends LITTLEBaseListener{
                 }
             }
 
-
             if((leftChild ==null && rightChild == null) || (visited.contains(leftChild) && visited.contains(rightChild))){
                 counter = counter.getParent();
             }else if(leftChild != null && !visited.contains(leftChild)){
@@ -426,7 +392,6 @@ public class ASTBuilder extends LITTLEBaseListener{
         HashMap<ASTNode, Integer> visited = new HashMap<>();
         Stack<String> opStack = new Stack<>();
         Stack<String> varStack = new Stack<>();
-//        System.out.println("PRINTING CODE:");
         do{
             count2++;
             String name = counter.getName();
@@ -474,14 +439,10 @@ public class ASTBuilder extends LITTLEBaseListener{
             tempNumber = Collections.max(registers);
         }
         ir.addComplexNode(op, right, left, registerType + tempNumber);
-//        System.out.println("OPERATION: " + op + " RIGHT: " + right+  " LEFT: " +left + " REG: "+ "T"+tempNumber);
         registers.add(tempNumber);
         ir.setRegisterCounter(tempNumber);
         return registerType + tempNumber;
     }
-
-    //
-
 }
 
 

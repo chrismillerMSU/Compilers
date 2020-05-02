@@ -10,6 +10,7 @@ public class MyListener extends LITTLEBaseListener{
     private String currentType;
     private String type;
     private HashMap values;
+    private HashMap stringValues;
     private String lastName;
     private int blockNumber;
     private boolean ifOrWhile;
@@ -19,10 +20,15 @@ public class MyListener extends LITTLEBaseListener{
         scopeOrder = new LinkedList<>();
         tokenOrder = new LinkedList<>();
         values = new HashMap<String, String>();
+        stringValues = new HashMap<String, String>();
         blockNumber = 1;
         type = "";
         lastName = "";
         ifOrWhile = false;
+    }
+
+    public HashMap<String, String> getStringValue(){
+        return stringValues;
     }
 
     public HashMap<String, String> getSymbolTable(){
@@ -52,14 +58,9 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
-//        System.out.println();
-
     }
 
     @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
-//        if(!ifOrWhile) {
-//            printTable((HashMap) symbolTableStack.peek());
-//        }
         ifOrWhile = true;
         scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
@@ -79,9 +80,6 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
-//        if(!ifOrWhile) {
-//            printTable((HashMap) symbolTableStack.peek());
-//        }
         ifOrWhile = true;
         scopeOrder.add("BLOCK " + blockNumber);
         symbolTableStack.push(new HashMap<String, String>());
@@ -93,9 +91,6 @@ public class MyListener extends LITTLEBaseListener{
     }
 
     @Override public void enterFunc_declarations(LITTLEParser.Func_declarationsContext ctx) {
-//        if(scopeOrder.contains("GLOBAL")){
-//            printTable((HashMap) symbolTableStack.peek());
-//        }
 
     }
 
@@ -126,6 +121,9 @@ public class MyListener extends LITTLEBaseListener{
 
     @Override public void exitString_decl(LITTLEParser.String_declContext ctx) {
         type = "";
+        String name = ctx.getText().split(":=")[0].split("STRING")[1];
+        String value = ctx.getText().split(":=")[1].split(";")[0];
+        stringValues.put(name,value);
     }
 
     @Override public void enterParam_decl_list(LITTLEParser.Param_decl_listContext ctx){

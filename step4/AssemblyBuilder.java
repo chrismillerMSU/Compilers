@@ -1,13 +1,24 @@
 import java.util.HashMap;
-public class IRBuilder {
+import java.util.Map;
 
-    private static int registerCounter = 1;
+public class AssemblyBuilder {
+
+    private static int registerCounter = 0;
     HashMap<String, String> registers = new HashMap<String, String>();
     private HashMap<String,String> symbolTable;
+    private HashMap<String,String> stringValues;
 
-    public IRBuilder(HashMap<String, String> symbolTable) {
-        System.out.println(";IR code");
+    public AssemblyBuilder(HashMap<String, String> symbolTable, HashMap<String,String> stringValues) {
         this.symbolTable = symbolTable;
+        this.stringValues = stringValues;
+        for (Map.Entry mapElement : symbolTable.entrySet()) {
+            String key = (String)mapElement.getKey();
+            if(mapElement.getValue().equals("STRING")){
+                System.out.println("str " + key + " " + stringValues.get(key));
+            } else {
+                System.out.println("var " + key);
+            }
+        }
     }
 
     public void addComplexNode(String op, String right, String left, String register) {
@@ -31,15 +42,19 @@ public class IRBuilder {
         }
 
         if(opType.equals("ADD")) {
-            System.out.println(";ADD" + type + " " + left + " " + right + " " + register);
+            System.out.println("move " + left + " " + register);
+            System.out.println("add" + type + " " + right + " " + register);
         } else if(opType.equals("MULTI")) {
-            System.out.println(";MULT" + type + " " + left + " " + right + " " + register);
+            System.out.println("move " + left + " " + register);
+            System.out.println("mul" + type + " " + right + " " + register);
         } else if(opType.equals("SUB")) {
-            System.out.println(";SUB" + type + " " + left + " " + right + " " + register);
+            System.out.println("move " + left + " " + register);
+            System.out.println("sub" + type + " " + right + " " + register);
         } else if(opType.equals("DIVI")) {
-            System.out.println(";DIV" + type + " " + left + " " + right + " " + register);
+            System.out.println("move " + left + " " + register);
+            System.out.println("div" + type + " " + right + " " + register);
         } else if(opType.equals("STORE")) {
-            System.out.println(";STORE" + type + " " + left + " " + right);
+            System.out.println("move " + left + " " + right);
         }
     }
 
@@ -50,8 +65,8 @@ public class IRBuilder {
                 ASTNode child = node.children.removeFirst();
                 String type = setType(child.type);
                 if(!child.value.contains("+") && !child.value.contains("-") && !child.value.contains("*") && !child.value.contains("/")) {
-                    System.out.println(";STORE" + type + " " + child.value + " $T" + registerCounter);
-                    System.out.println(";STORE" + type + " " + "$T" + registerCounter + " " + child.varName);
+                    System.out.println("move " + child.value + " r" + registerCounter);
+                    System.out.println("move " + "r" + registerCounter + " " + child.varName);
                     registerCounter++;
                 }
             }
@@ -59,14 +74,7 @@ public class IRBuilder {
             while (node.children.size() > 0) {
                 ASTNode child = node.children.removeFirst();
                 String type = setType(child.type);
-                System.out.println(";" + op + type +  " " + child.varName);
-            }
-        } else if(op.equals("LABEL")) {
-            while (node.children.size() > 0) {
-                ASTNode child = node.children.removeFirst();
-                System.out.println(";IR code");
-                System.out.println(";LABEL " + child.varName);
-                System.out.println(";LINK");
+                System.out.println("sys " + op.toLowerCase() + type +  " " + child.varName);
             }
         }
     }
@@ -91,13 +99,13 @@ public class IRBuilder {
         String type = "";
         switch(value) {
             case "INT":
-                type = "I";
+                type = "i";
                 break;
             case "STRING":
-                type = "S";
+                type = "s";
                 break;
             case "FLOAT":
-                type = "F";
+                type = "r";
                 break;
             default:
                 break;
