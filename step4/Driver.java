@@ -25,11 +25,10 @@ public class Driver {
             }catch (Error e){
 			    System.out.println(e.getMessage());
             }
-            System.out.println(listener.getSymbolTable());
+//            System.out.println(listener.getSymbolTable());
 
             ASTBuilder astBuilder = new ASTBuilder(listener.getSymbolTable());
 			try {
-			    System.out.println("Interative");
 				new IterativeParseTreeWalker().walk(astBuilder, context);
 			}catch (Error e){
 				System.out.println(e.getMessage());

@@ -10,14 +10,18 @@ public class ASTBuilder extends LITTLEBaseListener{
     private boolean splitting = false;
     private boolean splitEnded = false;
     private int tempNumber = 0;
+    private int assemblyNumber = -1;
     private ASTNode root;
     private ASTNode curChild = null;
     private ASTNode rootNode;
     private Queue<ASTNode> symbolTableStack = new LinkedList<ASTNode>();
     private HashMap<String,String> symbolTable;
+    HashSet<Integer> registers = new HashSet<Integer>();
+    AssemblyBuilder ir;
 
     ASTBuilder(HashMap<String,String> symbolTable){
         this.symbolTable = symbolTable;
+        this.ir = new AssemblyBuilder(symbolTable);
     }
     @Override public void enterAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
         char var = ctx.getText().charAt(0);
@@ -31,21 +35,18 @@ public class ASTBuilder extends LITTLEBaseListener{
 
         //-------------------------
         //ADD SOME CODE FOR CHECKING FOR ARITHMETIC OPERATIONS...
-//
 
 
         //-------------------------
         symbolTableStack.add(expr);
     }
     @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
-        IRBuilder ir = new IRBuilder();
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
             ir.addNode(node);
         }
-//        printAST();
+        tempNumber = ir.getRegisterCounter()-1;
         printCode();
-
     }
 
     @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) {
@@ -81,11 +82,14 @@ public class ASTBuilder extends LITTLEBaseListener{
 
     @Override public void exitProgram(LITTLEParser.ProgramContext ctx) {
         //on exit program print the AST...
-        IRBuilder ir = new IRBuilder();
         while(symbolTableStack.size() > 0) {
             ASTNode node = symbolTableStack.poll();
             ir.addNode(node);
         }
+        //
+//        System.out.println(";RET");
+//        System.out.println(";tiny code");
+        System.out.println("sys halt");
     }
 
 
@@ -121,7 +125,7 @@ public class ASTBuilder extends LITTLEBaseListener{
             addNode(right,left,op);
         }
 
-        System.out.println();
+//        System.out.println();
     }
 
     @Override public void exitFactor_prefix(LITTLEParser.Factor_prefixContext ctx) {
@@ -432,21 +436,22 @@ public class ASTBuilder extends LITTLEBaseListener{
                 if(type.equals("op")){
                     opStack.push(name);
                 }else if(type.equals("var")||type.equals("int")||type.equals("float")){
-                    if(varStack.size()>1)System.out.println(varStack.peek());
+                    //if(varStack.size()>1)System.out.println(varStack.peek());
                     varStack.push(name);
                     if(counter.getParent() != null &&!counter.getParent().getChildSide(counter)){ //if right child
-                        varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
+                        varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop(), "r"));
                     }else if(counter.getParent() == null){ //root
-                        printOperation(opStack.pop(),varStack.pop(),varStack.pop());
+                        printOperation(opStack.pop(),varStack.pop(),varStack.pop(), "r");
                         //ADD TO IR BUILDER addNode();
                     }
                 }
             }else if(visited.get(counter)>1 && type.equals("op") && getType(leftChild.getName()).equals("op") && getType(rightChild.getName()).equals("op")){
-                varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop()));
+                varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop(), "r"));
+            }else if(visited.get(counter)>1 && type.equals("op") && !getType(leftChild.getName()).equals("op") && getType(rightChild.getName()).equals("op")) {
+                varStack.push(printOperation(opStack.pop(),varStack.pop(),varStack.pop(), "r"));
             }else{
                 visited.replace(counter,1,2); //If we visit twice
             }
-
 
             if((leftChild ==null && rightChild == null) || (visited.containsKey(leftChild) && visited.containsKey(rightChild))){
                 counter = counter.getParent();
@@ -457,12 +462,20 @@ public class ASTBuilder extends LITTLEBaseListener{
             }
         }while(counter != null && count2<100);
     }
-
-    private String printOperation(String op, String right, String left){
+//
+    private String printOperation(String op, String right, String left, String registerType){
         tempNumber++;
-        System.out.println("OPERATION: " + op + " RIGHT: " + right+  " LEFT: " +left + " = "+ "T"+tempNumber);
-        return "T" + tempNumber;
+        if(registers.contains(tempNumber)) {
+            tempNumber = Collections.max(registers);
+        }
+        ir.addComplexNode(op, right, left, registerType + tempNumber);
+//        System.out.println("OPERATION: " + op + " RIGHT: " + right+  " LEFT: " +left + " REG: "+ "T"+tempNumber);
+        registers.add(tempNumber);
+        ir.setRegisterCounter(tempNumber);
+        return registerType + tempNumber;
     }
+
+    //
 
 }
 

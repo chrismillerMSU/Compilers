@@ -1,28 +1,45 @@
 import java.util.HashMap;
 public class IRBuilder {
 
-    public static int registerCounter = 1;
+    private static int registerCounter = 1;
     HashMap<String, String> registers = new HashMap<String, String>();
+    private HashMap<String,String> symbolTable;
 
-    public IRBuilder() {
+    public IRBuilder(HashMap<String, String> symbolTable) {
 //        System.out.println(";IR code");
+        this.symbolTable = symbolTable;
     }
 
-    public void addComplexNode(String op, String right, String left) {
+    public void addComplexNode(String op, String right, String left, String register) {
         String opType = setOp(op);
+        String type = "";
+        if(symbolTable.get(right) != null) type = symbolTable.get(right);
+        if(symbolTable.get(left) != null) type = symbolTable.get(left);
+        type = setType(type);
+        registers.put(register, type);
+
+        if(type.length() == 0) {
+            if(registers.get(left) != null) type = registers.get(left);
+            if(registers.get(right)!= null && type.length() == 0) type = registers.get(right);
+        }
+
+        if(type.length() == 0) {
+            type = getStaticType(left);
+            if(type.length() == 0) {
+                type = getStaticType(right);
+            }
+        }
+
         if(opType.equals("ADD")) {
-            String newRight = registers.containsKey(right) ? registers.get(right) : right;
-            String newLeft = registers.containsKey(left) ? registers.get(left) : left;
-
-//            registers.put("$T" + registerCounter, child.varName);
-//                System.out.println("ADDI " + child.value + " $T" + registerCounter);
-//                registerCounter++;
+            System.out.println(";ADD" + type + " " + left + " " + right + " " + register);
         } else if(opType.equals("MULTI")) {
-
+            System.out.println(";MULT" + type + " " + left + " " + right + " " + register);
         } else if(opType.equals("SUB")) {
-
+            System.out.println(";SUB" + type + " " + left + " " + right + " " + register);
         } else if(opType.equals("DIVI")) {
-
+            System.out.println(";DIV" + type + " " + left + " " + right + " " + register);
+        } else if(opType.equals("STORE")) {
+            System.out.println(";STORE" + type + " " + left + " " + right);
         }
     }
 
@@ -36,7 +53,6 @@ public class IRBuilder {
                 //IF IT HAS VARIABLES, THEN JUST DO SECOND STORE WITH REGISTER FROM MULT, ADD, SUB, DIVI OPERATION.
                 if(!child.value.contains("+") && !child.value.contains("-") && !child.value.contains("*") && !child.value.contains("/")) {
                     //---------------------------------
-                    registers.put("$T" + registerCounter, child.varName);
                     System.out.println(";STORE" + type + " " + child.value + " $T" + registerCounter);
                     System.out.println(";STORE" + type + " " + "$T" + registerCounter + " " + child.varName);
                     registerCounter++;
@@ -56,6 +72,22 @@ public class IRBuilder {
                 System.out.println(";LINK");
             }
         }
+    }
+
+    private String getStaticType(String input){
+        try{
+            int i = Integer.parseInt(input);
+            return  "I";
+        }catch (NumberFormatException e){
+
+        }
+        try{
+            Float i = Float.parseFloat(input);
+            return  "F";
+        }catch (NumberFormatException e){
+
+        }
+        return "S";
     }
 
     public String setType(String value) {
@@ -99,5 +131,13 @@ public class IRBuilder {
                 break;
         }
         return op;
+    }
+
+    public int getRegisterCounter() {
+        return registerCounter;
+    }
+
+    public void setRegisterCounter(int tempNumber) {
+        registerCounter = tempNumber;
     }
 }
