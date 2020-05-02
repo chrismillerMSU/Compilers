@@ -119,9 +119,9 @@ public class ASTBuilder extends LITTLEBaseListener{
             }
         }
         if(op.length()==1) {
-            //System.out.println("E op: "+op +"__"+ op.length());
-            //System.out.println("E left: "+left+"__"+ left.length());
-            //System.out.println("E right: "+right+"__"+ right.length());
+//            System.out.println("E op: "+op +"__"+ op.length());
+//            System.out.println("E left: "+left+"__"+ left.length());
+//            System.out.println("E right: "+right+"__"+ right.length());
             addNode(right,left,op);
         }
 
@@ -198,11 +198,11 @@ public class ASTBuilder extends LITTLEBaseListener{
         }
         if (!(rightType.equals("none")) && !(leftType.equals("none"))) {
             if(curChild.getLeftChild()==null){
-                //System.out.println("curr left child: none");
+//                System.out.println("curr left child: none");
                 newNode.addParent(curChild);
                 curChild.addLeftChild(newNode);
                 curChild = newNode;
-            }else if(curChild.getrightChild() != null && left.equals(curChild.getrightChild().getName()) && curChild.getName().equals(op)){
+            }else if(curChild.getrightChild() != null && left.equals(curChild.getrightChild().getName()) && sameKindOfOp(curChild.getName(), op)){
                 ASTNode parent = curChild.getParent();
                 splitting = true;
                 if(parent.getChildSide(curChild)){
@@ -257,7 +257,6 @@ public class ASTBuilder extends LITTLEBaseListener{
                     return;
                 }
             } else{
-                //System.out.println("curr left child: "+ curChild.getLeftChild().getName());
                 newNode.addParent(curChild);
                 curChild.addRightChild(newNode);
                 curChild = newNode;
@@ -324,6 +323,12 @@ public class ASTBuilder extends LITTLEBaseListener{
             }
         }
         //printInfo();
+    }
+
+    private boolean sameKindOfOp(String currOp, String newOp){
+        if((currOp.equals("+")||currOp.equals("-")) &&(newOp.equals("+")||newOp.equals("-"))){
+            return true;
+        }else return (currOp.equals("*") || currOp.equals("/")) && (newOp.equals("*") || newOp.equals("/"));
     }
 
     private void printInfo(){
