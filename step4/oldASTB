@@ -1,0 +1,215 @@
+private Stack<ASTNode> astNodeStack = new Stack<ASTNode>();
+    private LinkedList<ASTNode> currentTree;
+    private Stack<Stack<ASTNode>> naughtyList;
+    private HashMap<String,String> symbolTable;
+    private boolean naughty;
+    ASTBuilder(HashMap<String,String> symbolTable){
+        this.symbolTable = symbolTable;
+        this.naughty = false;
+    }
+
+    @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
+        ASTNode node;
+        while (currentTree.size()>0){
+            node = currentTree.remove();
+            System.out.println("Node: "+node.toString());
+            System.out.println("Children "+node.getChildren());
+            System.out.println();
+        }
+    }
+
+    @Override public void enterAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {
+        currentTree = new LinkedList<>();
+        naughtyList = new Stack<>();
+        naughtyList.push( new Stack<>());
+        char var = ctx.getText().charAt(0);
+        String value = ctx.getText().split("=")[1].split(";")[0];
+        System.out.println(var + " VALUE: " + value);
+        ASTNode expr = new ASTNode("=");
+        ASTNode varAssigned = new ASTNode(Character.toString(var), symbolTable.get(Character.toString(var)),value);
+        expr.add_expr(varAssigned);
+        astNodeStack.add(expr);
+    }
+
+    @Override public void enterExpr(LITTLEParser.ExprContext ctx) {
+        if(currentTree.size() > 0){
+            System.out.println("Enter");
+            naughty = true;
+            naughtyList.push(new Stack<ASTNode>());
+        }
+    }
+
+    @Override public void exitExpr(LITTLEParser.ExprContext ctx) {
+        System.out.println("Exit");
+        Stack<ASTNode> list = naughtyList.pop();
+        while(list.size()>0){
+            ASTNode node = list.pop();
+            naughtyList.peek().push(node);
+        }
+        if(naughtyList.size() < 2){
+            naughty = false;
+        }
+
+    }
+
+    @Override public void exitExpr_prefix(LITTLEParser.Expr_prefixContext ctx) {
+        boolean rightSide = true;
+        String right = "tooLong";
+        String op = "tooLong";
+        String left= "tooLong";
+        try {
+            LITTLEParser.ExprContext parent;
+            parent = (LITTLEParser.ExprContext) ctx.parent;
+            right = parent.factor().getText();
+            op= ctx.addop().getText();
+            left= ctx.factor().getText();
+            System.out.println("1");
+        }catch (Exception e){
+            rightSide = false;
+        }
+        if(!rightSide) {
+            try {
+                LITTLEParser.Expr_prefixContext parent;
+                parent = (LITTLEParser.Expr_prefixContext) ctx.parent;
+                right = parent.factor().getText();
+                op= ctx.addop().getText();
+                left= ctx.factor().getText();
+                System.out.println("2");
+            } catch (Exception e) {
+            }
+        }
+        if(op.length() == 1) {
+            ASTNode expr = new ASTNode(op);
+            if (!(right.length() > 2)) {
+                ASTNode rightVal = new ASTNode(right);
+                expr.add_expr(rightVal);
+                System.out.println("Right Var: " + right);
+            }
+            if (!(left.length() > 2)) {
+                ASTNode leftVal = new ASTNode(left);
+                expr.add_expr(leftVal);
+                System.out.println("Left Var: " + left);
+            }
+            System.out.println("exit expr_pre");
+            System.out.println("naughty: "+this.naughty);
+            Stack<ASTNode> list = naughtyList.peek();
+
+            if(naughty){
+               list.push(expr);
+            }else{
+                currentTree.add(expr);
+                while(list.size()>0){
+                    currentTree.add(list.pop());
+
+                }
+                if(naughtyList.size()>1){
+                    naughtyList.pop();
+                }
+
+            }
+            System.out.println("Operation: " + op);
+        }
+        System.out.println();
+    }
+
+    @Override public void exitFactor_prefix(LITTLEParser.Factor_prefixContext ctx) {
+        boolean rightSide = true;
+        ASTNode expr;
+        ASTNode leftVal;
+        ASTNode rightVal;
+        String op = "tooLong";
+        String left = "tooLong";
+        String right = "tooLong";
+        try {
+            LITTLEParser.FactorContext parent;
+            parent = (LITTLEParser.FactorContext) ctx.parent;
+            right = parent.postfix_expr().getText();
+            op = ctx.mulop().getText();
+            left = ctx.postfix_expr().getText();
+            System.out.println("1");
+        }catch (Exception e){
+            rightSide = false;
+            //System.out.println(e.getMessage());
+        }
+        if(!rightSide) {
+            try {
+                LITTLEParser.Factor_prefixContext parent;
+                parent = (LITTLEParser.Factor_prefixContext) ctx.parent;
+                right = parent.postfix_expr().getText();
+                op = ctx.mulop().getText();
+                left = ctx.postfix_expr().getText();
+                System.out.println("2");
+            } catch (Exception e) {
+                //System.out.println(e.getMessage());
+            }
+        }
+        if(op.length() == 1) {
+            expr = new ASTNode(op);
+            if (!(right.length() > 2)) {
+                rightVal = new ASTNode(right);
+                expr.add_expr(rightVal);
+                System.out.println("Right Var: " + right);
+            }
+            if (!(left.length() > 2)) {
+                leftVal = new ASTNode(left);
+                expr.add_expr(leftVal);
+                System.out.println("Left Var: " + left);
+            }
+            Stack<ASTNode> naughtyStack = naughtyList.peek();
+            naughtyStack.push(expr);
+            System.out.println("Operation: " + op);
+            System.out.println("exit factor pre");
+            System.out.println("naughty: "+this.naughty);
+        }
+
+        System.out.println();
+    }
+
+//    @Override public void enterFactor(LITTLEParser.FactorContext ctx) {
+//        System.out.println("enter factor: "+ctx.getText());
+//    }
+//    @Override public void exitFactor(LITTLEParser.FactorContext ctx) {
+//        System.out.println("exit factor: "+ctx.getText());
+//    }
+
+//    @Override public void enterPrimary(LITTLEParser.PrimaryContext ctx) {
+//        System.out.println("enter Primary: " + ctx.getText());
+//        try {
+//            System.out.println("P ID: " + ctx.id().getText());
+//        }catch (NullPointerException e){
+//            System.out.println("P ID: None");
+//        }
+//
+//    }
+
+//    @Override public void exitPrimary(LITTLEParser.PrimaryContext ctx) {
+//        System.out.println("exit Primary: " + ctx.getText());
+//        try {
+//            System.out.println("P ID: " + ctx.id().getText());
+//        }catch (NullPointerException e){
+//            System.out.println("P ID: None");
+//        }
+//
+//    }
+//    @Override public void enterAddop(LITTLEParser.AddopContext ctx) { System.out.println("Add: "+ctx.getText());}
+//
+//    @Override public void enterMulop(LITTLEParser.MulopContext ctx) { System.out.println("Mul: "+ctx.getText());}
+
+
+    @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) {
+        char var = ctx.getText().charAt(6);
+        System.out.println("WRITING: " + var);
+        ASTNode expr = new ASTNode("WRITE");
+        ASTNode varWritten = new ASTNode(Character.toString(var), symbolTable.get(Character.toString(var)),null);
+        expr.add_expr(varWritten);
+        astNodeStack.add(expr);
+    }
+
+    @Override public void enterFunc_decl(LITTLEParser.Func_declContext ctx) {
+        String name = ctx.getText().split("\\(")[0];
+        name = name.split("FUNCTIONVOID")[1];
+        System.out.println("Function name: " + name);
+        ASTNode expr = new ASTNode("LABEL");
+        ASTNode funcName = new ASTNode(name, "FUNC",null);
+        astNodeStack.add(expr);
+    }

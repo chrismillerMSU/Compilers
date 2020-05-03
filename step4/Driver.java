@@ -17,13 +17,22 @@ public class Driver {
 					error = true;
 				}
 			});
+            LITTLEParser.ProgramContext context = parser.program();
 			//Step 3
 			MyListener listener = new MyListener();
 			try {
-                new ParseTreeWalker().walk(listener, parser.program());
+                new ParseTreeWalker().walk(listener, context);
             }catch (Error e){
 			    System.out.println(e.getMessage());
             }
+//            System.out.println(listener.getSymbolTable());
+
+            ASTBuilder astBuilder = new ASTBuilder(listener.getSymbolTable(), listener.getStringValue());
+			try {
+				new IterativeParseTreeWalker().walk(astBuilder, context);
+			}catch (Error e){
+				System.out.println(e.getMessage());
+			}
 
 
 		} catch (IOException e) {
